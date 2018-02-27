@@ -14,31 +14,41 @@ session = DBSession()
 
 # JSON endpoint for category items
 @app.route('/catalog/<int:category_id>/JSON')
-def categoryItemsJSON(category_id):
+def categoryJSON(category_id):
     category = session.query(Category).filter_by(id = category_id).one()
     items = session.query(Item).filter_by(category_id = category_id)
     return jsonify(items=[i.serialize for i in items])
 
 @app.route('/catalog/<int:category_id>/<int:item_id>/JSON')
-def singleItemJSON(category_id, item_id):
-    category = session.query(Category).filter_by(id = category_id).one()
+def itemJSON(category_id, item_id):
     item = session.query(Item).filter_by(id = item_id).one()
     return jsonify(item.serialize)
 
 
 
-# Write function that serves all categories and new items
+# TODO Write function that serves the home page with all categories and new items
 @app.route('/')
+@app.route('/catalog/')
+def showCatalog():
+    categories = session.query(Category).all()
+    return render_template('home.html', categories=categories)
+
+# Write function that renders each category
 @app.route('/catalog/<int:category_id>/')
-def categoryItems(category_id):
+def showCategory(category_id):
     category = session.query(Category).filter_by(id = category_id).one()
     items = session.query(Item).filter_by(category_id = category_id)
     return render_template('category.html', category=category, items=items)
 
+@app.route('/catalog/<int:category_id>/<int:item_id>/')
+def showItem(category_id, item_id):
+    item = session.query(Item).filter_by(id = item_id).one()
+    return render_template('item.html', category_id=category_id, item=item)
+
 
 # 1.Write create new item function
 @app.route('/catalog/<int:category_id>/new/', methods=['GET', 'POST'])
-def newCategoryItem(category_id):
+def newItem(category_id):
     if request.method == 'POST':
         newItem = Item(name = request.form['name'],
                        description = request.form['description'],
@@ -47,14 +57,36 @@ def newCategoryItem(category_id):
         session.add(newItem)
         session.commit()
         flash("%s has been created!" % newItem.name)
-        return redirect(url_for('categoryItems', category_id = category_id))
+        return redirect(url_for('showCategory', category_id = category_id))
     else:
         return render_template('newItem.html', category_id = category_id)
+
+@app.route('/catalog/new', methods=['GET','POST'])
+def newCategory():
+    if request.method == 'POST':
+        newCategory = Category(name = request.form['name'])
+        session.add(newCategory)
+        session.commit()
+        flash("%s has been created!" % newCategory)
+        return redirect(url_for('showCatalog'))
+    else:
+        return render_template('newCategory.html')
+
+@app.route('/catalog/<int:category_id>/delete', methods=['GET','POST'])
+def deleteCategory(category_id):
+    categoryToDelete = session.query(Category).filter_by(id = category_id).one()
+    if request.method == 'POST':
+        session.delete(categoryToDelete)
+        session.commit()
+        flash("%s has been deleted!" % categoryToDelete.name)
+        return redirect(url_for('showCatalog'))
+    else:
+        return render_template('deleteCategory.html')
 
 
 # 2.Write edit item function
 @app.route('/catalog/<int:category_id>/<int:item_id>/edit/', methods=['GET', 'POST'])
-def editCategoryItem(category_id, item_id):
+def editItem(category_id, item_id):
     editedItem = session.query(Item).filter_by(id = item_id).one()
     if request.method == 'POST':
         if request.form['name']:
@@ -66,7 +98,7 @@ def editCategoryItem(category_id, item_id):
         session.add(editedItem)
         session.commit()
         flash("%s has been edited" % editedItem.name)
-        return redirect(url_for('categoryItems', category_id=category_id))
+        return redirect(url_for('showCategory', category_id=category_id))
     else:
         return render_template('editItem.html',
                                 category_id = category_id,
@@ -76,13 +108,13 @@ def editCategoryItem(category_id, item_id):
 
 # 3.Write delete item function
 @app.route('/catalog/<int:category_id>/<int:item_id>/delete/', methods=['GET', 'POST'])
-def deleteCategoryItem(category_id, item_id):
+def deleteItem(category_id, item_id):
     itemToDelete = session.query(Item).filter_by(id=item_id).one()
     if request.method == 'POST':
         session.delete(itemToDelete)
         session.commit()
         flash("%s has been deleted!" % itemToDelete.name)
-        return redirect(url_for('categoryItems', category_id=category_id))
+        return redirect(url_for('showCategory', category_id=category_id))
     else:
         return render_template('deleteItem.html', category_id=category_id, i=itemToDelete)
 
