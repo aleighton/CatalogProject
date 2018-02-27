@@ -12,9 +12,22 @@ Base.metadata.create_all(engine)
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
+# JSON endpoint for category items
+@app.route('/catalog/<int:category_id>/JSON')
+def categoryItemsJSON(category_id):
+    category = session.query(Category).filter_by(id = category_id).one()
+    items = session.query(Item).filter_by(category_id = category_id)
+    return jsonify(items=[i.serialize for i in items])
+
+@app.route('/catalog/<int:category_id>/<int:item_id>/JSON')
+def singleItemJSON(category_id, item_id):
+    category = session.query(Category).filter_by(id = category_id).one()
+    item = session.query(Item).filter_by(id = item_id).one()
+    return jsonify(item.serialize)
+
+
+
 # Write function that serves all categories and new items
-
-
 @app.route('/')
 @app.route('/catalog/<int:category_id>/')
 def categoryItems(category_id):
@@ -68,7 +81,7 @@ def deleteCategoryItem(category_id, item_id):
     if request.method == 'POST':
         session.delete(itemToDelete)
         session.commit()
-        flash("%s has been deleted!" % itemToDelete)
+        flash("%s has been deleted!" % itemToDelete.name)
         return redirect(url_for('categoryItems', category_id=category_id))
     else:
         return render_template('deleteItem.html', category_id=category_id, i=itemToDelete)
