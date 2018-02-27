@@ -22,13 +22,41 @@ def categoryItems(category_id):
     items = session.query(Item).filter_by(category_id = category_id)
     return render_template('category.html', category=category, items=items)
 # 1.Write create new item function
-@app.route('/catalog/<int:category_id>/new/')
+@app.route('/catalog/<int:category_id>/new/', methods=['GET', 'POST'])
 def newCategoryItem(category_id):
-    return "A page to create a new item"
+    if request.method == 'POST':
+        newItem = Item(name = request.form['name'],
+                       description = request.form['description'],
+                       price = request.form['price'],
+                       category_id = category_id)
+        session.add(newItem)
+        session.commit()
+        return redirect(url_for('categoryItems', category_id = category_id))
+    else:
+        return render_template('newItem.html', category_id = category_id)
+
+
 # 2.Write edit item function
-@app.route('/catalog/<int:category_id>/<int:item_id>/edit/')
+@app.route('/catalog/<int:category_id>/<int:item_id>/edit/', methods=['GET', 'POST'])
 def editCategoryItem(category_id, item_id):
-    return "A page to edit an item"
+    editedItem = session.query(Item).filter_by(id = item_id).one()
+    if request.method == 'POST':
+        if request.form['name']:
+            editedItem.name = request.form['name']
+        if request.form['description']:
+            editedItem.description = request.form['description']
+        if request.form['price']:
+            editedItem.price = request.form['price']
+        session.add(editedItem)
+        session.commit()
+        return redirect(url_for('categoryItems', category_id=category_id))
+    else:
+        return render_template('editItem.html',
+                                category_id = category_id,
+                                item_id = item_id,
+                                i = editedItem)
+
+
 # 3.Write delete item function
 @app.route('/catalog/<int:category_id>/<int:item_id>/delete/')
 def deleteCategoryItem(category_id, item_id):
