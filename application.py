@@ -3,6 +3,8 @@ from flask import redirect, url_for, flash, jsonify
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from database_setup import Base, Item, Category
+from flask import session as login_session
+import random, string
 
 app = Flask(__name__)
 
@@ -11,6 +13,14 @@ Base.metadata.create_all(engine)
 
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
+
+# Create a state-token to prevent request forgery
+#Store it in the session for later use
+@app.route('/catalog/login')
+def showLogin():
+    state = ''.join(random.choice(string.ascii_uppercase + string.digits) for x in xrange(32))
+    login_session['state'] = state
+    return "The current session state is %s" % login_session['state']
 
 # JSON endpoint for category items
 @app.route('/catalog/<int:category_id>/JSON')
@@ -119,6 +129,8 @@ def deleteItem(category_id, item_id):
         return redirect(url_for('showCategory', category_id=category_id))
     else:
         return render_template('deleteItem.html', category_id=category_id, i=itemToDelete)
+
+
 
 if __name__ == '__main__':
     app.secret_key = 'super_secret_key'
