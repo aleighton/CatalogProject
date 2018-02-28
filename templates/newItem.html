@@ -6,7 +6,7 @@
   </head>
   <body>
     <h1>Create New Item</h1>
-    <form action="{{url_for('newCategoryItem', category_id = category_id)}}" method="POST">
+    <form action="{{url_for('newItem', category_id = category_id)}}" method="POST">
       <p>Name:</p>
       <input type="text" name="name">
 
@@ -17,6 +17,7 @@
       <input type="text" name="price">
 
       <input type="submit" value="Create">
+      <a href= "{{url_for('showCategory', category_id = category_id)}}">Cancel</a>
     </form>
   </body>
 </html>

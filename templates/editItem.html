@@ -6,7 +6,7 @@
   </head>
   <body>
     <h1>Edit Item</h1>
-    <form action= "{{url_for('editCategoryItem', category_id = category_id, item_id=i.id)}}" method = 'POST'>
+    <form action= "{{url_for('editItem', category_id = category_id, item_id=i.id)}}" method = 'POST'>
 
     <p>Name:</p>
     <input type = 'text' size='30' name = 'name' placeholder = '{{i.name}}'>
@@ -17,6 +17,6 @@
     <br>
     <input type='submit' value='Update'>
     </form>
-    <a href= "{{url_for('categoryItems', category_id=i.category_id)}}">Cancel</a>
+    <a href= "{{url_for('showCategory', category_id=i.category_id)}}">Cancel</a>
   </body>
 </html>

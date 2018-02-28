@@ -26,11 +26,15 @@ def itemJSON(category_id, item_id):
 
 
 
-# TODO Write function that serves the home page with all categories and new items
+# TODO Write function that serves the home page with all categories and new/sale items
+# add timestamp field to Item table filter for the newest 9 items
+# add sale/discount field to Item table for featured sale items in showCatalog()
+
 @app.route('/')
 @app.route('/catalog/')
 def showCatalog():
     categories = session.query(Category).all()
+    items = session.query(Item).all()
     return render_template('home.html', categories=categories)
 
 # Write function that renders each category
@@ -72,18 +76,6 @@ def newCategory():
     else:
         return render_template('newCategory.html')
 
-@app.route('/catalog/<int:category_id>/delete', methods=['GET','POST'])
-def deleteCategory(category_id):
-    categoryToDelete = session.query(Category).filter_by(id = category_id).one()
-    if request.method == 'POST':
-        session.delete(categoryToDelete)
-        session.commit()
-        flash("%s has been deleted!" % categoryToDelete.name)
-        return redirect(url_for('showCatalog'))
-    else:
-        return render_template('deleteCategory.html')
-
-
 # 2.Write edit item function
 @app.route('/catalog/<int:category_id>/<int:item_id>/edit/', methods=['GET', 'POST'])
 def editItem(category_id, item_id):
@@ -105,6 +97,16 @@ def editItem(category_id, item_id):
                                 item_id = item_id,
                                 i = editedItem)
 
+@app.route('/catalog/<int:category_id>/delete', methods=['GET','POST'])
+def deleteCategory(category_id):
+    categoryToDelete = session.query(Category).filter_by(id = category_id).one()
+    if request.method == 'POST':
+        session.delete(categoryToDelete)
+        session.commit()
+        flash("%s has been deleted!" % categoryToDelete.name)
+        return redirect(url_for('showCatalog'))
+    else:
+        return render_template('deleteCategory.html')
 
 # 3.Write delete item function
 @app.route('/catalog/<int:category_id>/<int:item_id>/delete/', methods=['GET', 'POST'])

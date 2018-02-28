@@ -6,15 +6,27 @@
   </head>
   <body>
     <h1>{{ category.name }}</h1>
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+      <ul>
+        {% for message in messages %}
+          <li><strong>{{message}}</strong></li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+    {% endwith %}
+    <a href = '{{url_for('newItem', category_id = category.id) }}'>Create New Item</a>
+    <br>
     {% for i in items %}
-    {{i.name}}
+    <a href='{{url_for('showItem', category_id = category.id, item_id = i.id)}}'>{{i.name}}</a>
     </br>
     {{i.price}}
     </br>
-    <a href='{{url_for('editCategoryItem', category_id = category.id, item_id = i.id) }}'>Edit</a>
+    <a href='{{url_for('editItem', category_id = category.id, item_id = i.id)}}'>Edit</a>
     </br>
-    <a href = '{{url_for('deleteCategoryItem', category_id = category.id, item_id = i.id ) }}'>Delete</a>
+    <a href = '{{url_for('deleteItem', category_id = category.id, item_id = i.id)}}'>Delete</a>
     </br>
     {% endfor %}
+    <a href="{{url_for('showCatalog')}}">Back</a>
   </body>
 </html>
