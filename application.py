@@ -4,13 +4,15 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from database_setup import Base, Item, Category
 from flask import session as login_session
-import random, string
+import random
+import string
 from oauth2client.client import flow_from_clientsecrets
 from oauth2client.client import FlowExchangeError
 import httplib2
 import json
 from flask import make_response
 import requests
+import math
 
 app = Flask(__name__)
 
@@ -77,7 +79,7 @@ def gconnect():
     if result['issued_to'] != CLIENT_ID:
         response = make_response(
             json.dumps("Token's client ID does not match app's."), 401)
-        print "Token's client ID does not match app's."
+        print("Token's client ID does not match app's.")
         response.headers['Content-Type'] = 'application/json'
         return response
 
@@ -112,7 +114,7 @@ def gconnect():
     output += login_session['picture']
     output += ' " style = "width: 300px; height: 300px;border-radius: 150px;-webkit-border-radius: 150px;-moz-border-radius: 150px;"> '
     flash("you are now logged in as %s" % login_session['username'])
-    print "done!"
+    print ("done!")
     return output
 
 
@@ -160,17 +162,32 @@ def itemJSON(category_id, item_id):
     return jsonify(item.serialize)
 
 
-
+# TODO change hometest back to home
 # TODO Write function that serves the home page with all categories and new/sale items
-# add timestamp field to Item table filter for the newest 9 items
+# add timestamp field to Item table filter for the newest 6 items
 # add sale/discount field to Item table for featured sale items in showCatalog()
+
+# Returns category name in template, passes category_id from a single item record
+def getCatName(category_id):
+    categories = session.query(Category).all()
+    catName = session.query(Category).filter_by(id=category_id).one()
+    return catName.name
 
 @app.route('/')
 @app.route('/catalog/')
 def showCatalog():
     categories = session.query(Category).all()
-    items = session.query(Item).all()
-    return render_template('home.html', categories=categories)
+# TODO filter and order items by timestamp when field is added to Item table for Latest Items on homepage
+    items = session.query(Item).limit(6).all()
+# Splits items list into sublists for use in html elements
+    rowOneItems = items[0:2]
+    rowTwoItems = items[2:4]
+    rowThreeItems = items[4:6]
+    return render_template('hometester.html',
+                            categories=categories,
+                            rowOneItems=rowOneItems,
+                            rowTwoItems=rowTwoItems,
+                            rowThreeItems=rowThreeItems)
 
 # Write function that renders each category
 @app.route('/catalog/<int:category_id>/')
@@ -191,23 +208,24 @@ def newItem(category_id):
     if 'username' not in login_session:
         return redirect('/catalog/login')
     if request.method == 'POST':
-        newItem = Item(name = request.form['name'],
-                       description = request.form['description'],
-                       price = request.form['price'],
-                       category_id = category_id)
+        newItem = Item(name=request.form['name'],
+                       description=request.form['description'],
+                       price=request.form['price'],
+                       category_id=category_id)
         session.add(newItem)
         session.commit()
         flash("%s has been created!" % newItem.name)
-        return redirect(url_for('showCategory', category_id = category_id))
+        return redirect(url_for('showCategory', category_id=category_id))
     else:
-        return render_template('newItem.html', category_id = category_id)
+        return render_template('newItem.html', category_id=category_id)
 
-@app.route('/catalog/new', methods=['GET','POST'])
+
+@app.route('/catalog/new', methods=['GET', 'POST'])
 def newCategory():
     if 'username' not in login_session:
         return redirect('/catalog/login')
     if request.method == 'POST':
-        newCategory = Category(name = request.form['name'])
+        newCategory = Category(name=request.form['name'])
         session.add(newCategory)
         session.commit()
         flash("%s has been created!" % newCategory)
@@ -215,12 +233,14 @@ def newCategory():
     else:
         return render_template('newCategory.html')
 
+
 # 2.Write edit item function
-@app.route('/catalog/<int:category_id>/<int:item_id>/edit/', methods=['GET', 'POST'])
+@app.route('/catalog/<int:category_id>/<int:item_id>/edit/', methods=['GET',
+                                                                      'POST'])
 def editItem(category_id, item_id):
     if 'username' not in login_session:
         return redirect('/catalog/login')
-    editedItem = session.query(Item).filter_by(id = item_id).one()
+    editedItem = session.query(Item).filter_by(id=item_id).one()
     if request.method == 'POST':
         if request.form['name']:
             editedItem.name = request.form['name']
@@ -234,15 +254,16 @@ def editItem(category_id, item_id):
         return redirect(url_for('showCategory', category_id=category_id))
     else:
         return render_template('editItem.html',
-                                category_id = category_id,
-                                item_id = item_id,
-                                i = editedItem)
+                               category_id=category_id,
+                               item_id=item_id,
+                               i=editedItem)
 
-@app.route('/catalog/<int:category_id>/delete', methods=['GET','POST'])
+
+@app.route('/catalog/<int:category_id>/delete', methods=['GET', 'POST'])
 def deleteCategory(category_id):
     if 'username' not in login_session:
         return redirect('/catalog/login')
-    categoryToDelete = session.query(Category).filter_by(id = category_id).one()
+    categoryToDelete = session.query(Category).filter_by(id=category_id).one()
     if request.method == 'POST':
         session.delete(categoryToDelete)
         session.commit()
@@ -251,8 +272,11 @@ def deleteCategory(category_id):
     else:
         return render_template('deleteCategory.html')
 
+
 # 3.Write delete item function
-@app.route('/catalog/<int:category_id>/<int:item_id>/delete/', methods=['GET', 'POST'])
+@app.route('/catalog/<int:category_id>/<int:item_id>/delete/', methods=['GET',
+                                                                        'POST']
+           )
 def deleteItem(category_id, item_id):
     if 'username' not in login_session:
         return redirect('/catalog/login')
@@ -263,11 +287,36 @@ def deleteItem(category_id, item_id):
         flash("%s has been deleted!" % itemToDelete.name)
         return redirect(url_for('showCategory', category_id=category_id))
     else:
-        return render_template('deleteItem.html', category_id=category_id, i=itemToDelete)
+        return render_template('deleteItem.html',
+                               category_id=category_id,
+                               i=itemToDelete)
 
+
+def getUserID(email):
+    try:
+        user = session.query(User).filter_by(email=email).one()
+        return user
+    except:
+        return None
+
+
+def getUserInfo(user_id):
+    user = session.query(User).filter_by(id=user_id).one()
+    return user
+
+
+def createUser(login_session):
+    newUser = User(name=login_session['username'],
+                   email=login_session['email'],
+                   picture=login_session['picture'])
+    session.add(newUser)
+    session.commit()
+    user = session.query(User).filter_by(email=login_session['email']).one()
+    return user.id
 
 
 if __name__ == '__main__':
     app.secret_key = 'super_secret_key'
+    app.jinja_env.globals.update(getCatName=getCatName)
     app.debug = True
     app.run(host='0.0.0.0', port=5000)
