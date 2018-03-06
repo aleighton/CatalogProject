@@ -92,8 +92,7 @@ def gconnect():
     stored_access_token = login_session.get('access_token')
     stored_gplus_id = login_session.get('gplus_id')
     if stored_access_token is not None and gplus_id == stored_gplus_id:
-        response = make_response(json.dumps('Current user is already connected.'),
-                                 200)
+        response = make_response(json.dumps('Already connected.'), 200)
         response.headers['Content-Type'] = 'application/json'
         return response
 
@@ -124,7 +123,6 @@ def gconnect():
     output += '!</h1>'
     output += '<img src="'
     output += login_session['picture']
-    output += ' " style = "width: 300px; height: 300px;border-radius: 150px;-webkit-border-radius: 150px;-moz-border-radius: 150px;"> '
     flash("you are now logged in as %s" % login_session['username'])
     print("done!")
     return output
@@ -169,7 +167,6 @@ def gdisconnect():
 # JSON endpoint for category items
 @app.route('/catalog/<int:category_id>/JSON')
 def categoryJSON(category_id):
-    category = session.query(Category).filter_by(id=category_id).one()
     items = session.query(Item).filter_by(category_id=category_id)
     return jsonify(items=[i.serialize for i in items])
 
@@ -180,14 +177,8 @@ def itemJSON(category_id, item_id):
     return jsonify(item.serialize)
 
 
-# TODO change hometest back to home
-# TODO Write function that serves the home page with all categories
-# add timestamp field to Item table filter for the newest 6 items
-# add sale/discount field to Item table for featured sale items in showCatalog
-
 # Returns category name in template, passes category_id from a single item
 def getCatName(category_id):
-    categories = session.query(Category).all()
     catName = session.query(Category).filter_by(id=category_id).one()
     return catName.name
 
@@ -196,7 +187,7 @@ def getCatName(category_id):
 @app.route('/catalog/')
 def showCatalog():
     categories = session.query(Category).all()
-# TODO filter and order items by timestamp when
+# TODO filter and order items by timestamp when field is added to Items Table
     items = session.query(Item).limit(6).all()
 # Splits items list into sublists for use in html elements
     rowOneItems = items[0:2]
@@ -248,6 +239,7 @@ def newItem(category_id):
         return render_template('newItem.html', category_id=category_id)
 
 
+# New Category function
 @app.route('/catalog/new', methods=['GET', 'POST'])
 def newCategory():
     if 'username' not in login_session:
@@ -263,7 +255,7 @@ def newCategory():
         return render_template('newCategory.html')
 
 
-# 2.Write edit item function
+# 2. Edit item function
 @app.route('/catalog/<int:category_id>/<int:item_id>/edit/', methods=['GET',
                                                                       'POST'])
 def editItem(category_id, item_id):
@@ -288,6 +280,7 @@ def editItem(category_id, item_id):
                                i=editedItem)
 
 
+# Edit category function
 @app.route('/catalog/<int:category_id>/edit', methods=['GET', 'POST'])
 def editCategory(category_id):
     if 'username' not in login_session:
@@ -305,6 +298,7 @@ def editCategory(category_id):
                                i=editedCategory)
 
 
+# Delete Category function
 @app.route('/catalog/<int:category_id>/delete', methods=['GET', 'POST'])
 def deleteCategory(category_id):
     if 'username' not in login_session:
@@ -319,7 +313,7 @@ def deleteCategory(category_id):
         return render_template('deleteCategory.html')
 
 
-# 3.Write delete item function
+# 3. Delete item function
 @app.route('/catalog/<int:category_id>/<int:item_id>/delete/',
            methods=['GET', 'POST'])
 def deleteItem(category_id, item_id):
