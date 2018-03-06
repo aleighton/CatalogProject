@@ -2,31 +2,80 @@
 <html>
   <head>
     <meta charset="utf-8">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <title></title>
   </head>
   <body>
-    <h1>{{ category.name }}</h1>
-    {% with messages = get_flashed_messages() %}
-      {% if messages %}
-      <ul>
-        {% for message in messages %}
-          <li><strong>{{message}}</strong></li>
+    <div class="container">
+    <header class="blog-header py-3">
+      <div class="row flex-nowrap justify-content-between align-items-center">
+        <div class="col-3">
+          {% if 'username' in login_session %}
+          <h4>{{login_session['username']}}</h4>
+          {% endif %}
+        </div>
+        <div class="col-6 text-center">
+          <a class="blog-header-logo text-dark" href="{{url_for('showCatalog')}}"><h1>Blue Sky Tech Boutique</h1></a>
+        </div>
+            {% if 'username' not in login_session %}
+            <div class="col-3 d-flex">
+            <a class="btn btn-sm btn-outline-secondary float-right" href="{{url_for('showLogin')}}">Log In</a>
+            </div>
+            {% else %}
+            <div class="col-3 d-flex">
+            <a class="btn btn-sm btn-outline-secondary float-right" href="{{url_for('gdisconnect')}}">Log Out</a>
+          </div>
+            {% endif %}
+      </div>
+    </header>
+    <div class="nav-scroller py-1 mb-2">
+      <nav class="nav d-flex justify-content-between">
+        {% for category in categories %}
+          <a class="p-2 text-muted" href = '{{url_for('showCategory', category_id = category.id) }}'>{{category.name}}</a>
         {% endfor %}
-      </ul>
-      {% endif %}
-    {% endwith %}
-    <a href = '{{url_for('newItem', category_id = category.id) }}'>Create New Item</a>
+      </nav>
+    </div>
+    <div class="row">
+      <div class="flex-column col-12">
+        <h2 class="text-center">{{ category.name }}</h2>
+      </div>
+    </div>
+    <div class="row">
+    {% if 'username' in login_session%}
+      <div class="text-center col-6">
+        <a href="{{url_for('showCatalog')}}">Back</a>
+      </div>
+      <div class="text-center col-6">
+        <a href = '{{url_for('newItem', category_id = category.id) }}'>Create New Item</a>
+      </div>
+    {% else %}
+      <div class="text-center col-12">
+        <a href="{{url_for('showCatalog')}}">Back</a>
+      </div>
+    {% endif %}
+    </div>
     <br>
-    {% for i in items %}
-    <a href='{{url_for('showItem', category_id = category.id, item_id = i.id)}}'>{{i.name}}</a>
-    </br>
-    {{i.price}}
-    </br>
-    <a href='{{url_for('editItem', category_id = category.id, item_id = i.id)}}'>Edit</a>
-    </br>
-    <a href = '{{url_for('deleteItem', category_id = category.id, item_id = i.id)}}'>Delete</a>
-    </br>
-    {% endfor %}
-    <a href="{{url_for('showCatalog')}}">Back</a>
+      {% for i in items %}
+    <div class="row mb-2">
+      <div class="col md-6">
+        <div class="card flex-md-row mb-4 box-shadow h-md-250">
+          <div class="card-body d-flex flex-column align-items-start">
+            <h3 class="mb-0"><a class="text-dark"href="{{url_for('showItem', category_id = i.category_id, item_id = i.id)}}">{{i.name}}</a></h3>
+            <p class="card-text mb-auto">{{i.description}}</p>
+            <p class="card-text mb-auto">{{i.price}}</p>
+            {% if 'username' in login_session %}
+            <div class="row">
+            <a href='{{url_for('editItem', category_id = category.id, item_id = i.id)}}'>Edit</a>
+            </br>
+            <a href = '{{url_for('deleteItem', category_id = category.id, item_id = i.id)}}'>Delete</a>
+          </div>
+          {% endif %}
+          </div>
+          <img class="card-img-right flex-auto d-none d-md-block" src="http://via.placeholder.com/200x250" style="width: 200px; height: 250px;">
+        </div>
+      </div>
+    </div>
+      {% endfor %}
+    </div>
   </body>
 </html>

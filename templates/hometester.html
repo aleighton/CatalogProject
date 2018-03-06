@@ -9,20 +9,27 @@
     <div class="container">
       <header class="blog-header py-3">
         <div class="row flex-nowrap justify-content-between align-items-center">
-          <div class="col-1">
+            {% if 'username' in login_session %}
+          <div class="col-3">
+            <h4>{{login_session['username']}}</h4>
           </div>
-          <div class="col-10 text-center">
-            <a class="blog-header-logo text-dark" href="{{url_for('showCatalog')}}">Blue Sky Tech Boutique</a>
+            {% else %}
+          <div class="col-3">
+          </div>
+            {% endif %}
+          <div class="col-6 text-center">
+            <a class="blog-header-logo text-dark" href="{{url_for('showCatalog')}}"><h1>Blue Sky Tech Boutique</h1></a>
           </div>
               {% if 'username' not in login_session %}
-              <div class="col-1 d-flex">
+              <div class="col-3 d-flex">
               <a class="btn btn-sm btn-outline-secondary float-right" href="{{url_for('showLogin')}}">Log In</a>
               </div>
               {% else %}
               <div class="col-1 d-flex">
-              <img class="profile-image img-circle"src="{{login_session['picture']}}" style="height: 40px; width: 40px;" alt="profile image">
-              <p>{{login_session['username']}}</p>
               <a class="btn btn-sm btn-outline-secondary float-right" href="{{url_for('gdisconnect')}}">Log Out</a>
+            </div>
+            <div class="col-2">
+              <a class="text-dark text-center" href="{{url_for('newCategory')}}"><h5>New Category</h5></a>
             </div>
               {% endif %}
         </div>
@@ -44,8 +51,8 @@
         <div class="col md-6">
           <div class="card flex-md-row mb-4 box-shadow h-md-250">
             <div class="card-body d-flex flex-column align-items-start">
-              <strong class="d-inline-block mb-2 text-primary">{{getCatName(i.category_id)}}</strong>
-              <h3 class="mb-0"><a class="text-dark"href="#">{{i.name}}</a></h3>
+              <a href="{{url_for('showCategory', category_id=i.category_id)}}"><strong class="d-inline-block mb-2 text-primary">{{getCatName(i.category_id)}}</strong></a>
+              <h3 class="mb-0"><a class="text-dark"href="{{url_for('showItem', category_id = i.category_id, item_id = i.id)}}">{{i.name}}</a></h3>
               <p class="card-text mb-auto">{{i.description}}</p>
               <p class="card-text mb-auto">{{i.price}}</p>
             </div>
@@ -59,8 +66,7 @@
         <div class="col md-6">
           <div class="card flex-md-row mb-4 box-shadow h-md-250">
             <div class="card-body d-flex flex-column align-items-start">
-              <strong class="d-inline-block mb-2 text-primary">{{ getCatName(i.category_id) }}</strong>
-              <h3 class="mb-0"><a class="text-dark"href="#">{{i.name}}</a></h3>
+              <a href="{{url_for('showCategory', category_id=i.category_id)}}"><strong class="d-inline-block mb-2 text-primary">{{getCatName(i.category_id)}}</strong></a>              <h3 class="mb-0"><a class="text-dark"href="{{url_for('showItem', category_id = i.category_id, item_id = i.id)}}">{{i.name}}</a></h3>
               <p class="card-text mb-auto">{{i.description}}</p>
               <p class="card-text mb-auto">{{i.price}}</p>
             </div>
@@ -74,8 +80,7 @@
         <div class="col md-6">
           <div class="card flex-md-row mb-4 box-shadow h-md-250">
             <div class="card-body d-flex flex-column align-items-start">
-              <strong class="d-inline-block mb-2 text-primary">{{getCatName(i.category_id)}}</strong>
-              <h3 class="mb-0"><a class="text-dark"href="#">{{i.name}}</a></h3>
+              <a href="{{url_for('showCategory', category_id=i.category_id)}}"><strong class="d-inline-block mb-2 text-primary">{{getCatName(i.category_id)}}</strong></a>              <h3 class="mb-0"><a class="text-dark"href="{{url_for('showItem', category_id = i.category_id, item_id = i.id)}}">{{i.name}}</a></h3>
               <p class="card-text mb-auto">{{i.description}}</p>
               <p class="card-text mb-auto">{{i.price}}</p>
             </div>

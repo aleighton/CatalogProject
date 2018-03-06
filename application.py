@@ -16,7 +16,9 @@ import math
 
 app = Flask(__name__)
 
-CLIENT_ID = json.loads(open('client_secrets.json', 'r').read())['web']['client_id']
+CLIENT_ID = json.loads(open('client_secrets.json',
+                       'r').read())['web']['client_id']
+
 APPLICATION_NAME = "Blue Sky Tech Boutique"
 
 engine = create_engine('sqlite:///catalog.db')
@@ -83,7 +85,7 @@ def gconnect():
     if result['issued_to'] != CLIENT_ID:
         response = make_response(
             json.dumps("Token's client ID does not match app's."), 401)
-        print "Token's client ID does not match app's."
+        print("Token's client ID does not match app's.")
         response.headers['Content-Type'] = 'application/json'
         return response
 
@@ -124,32 +126,8 @@ def gconnect():
     output += login_session['picture']
     output += ' " style = "width: 300px; height: 300px;border-radius: 150px;-webkit-border-radius: 150px;-moz-border-radius: 150px;"> '
     flash("you are now logged in as %s" % login_session['username'])
-    print "done!"
+    print("done!")
     return output
-
-# User Helper Functions
-
-
-def createUser(login_session):
-    newUser = User(name=login_session['username'], email=login_session[
-                   'email'], picture=login_session['picture'])
-    session.add(newUser)
-    session.commit()
-    user = session.query(User).filter_by(email=login_session['email']).one()
-    return user.id
-
-
-def getUserInfo(user_id):
-    user = session.query(User).filter_by(id=user_id).one()
-    return user
-
-
-def getUserID(email):
-    try:
-        user = session.query(User).filter_by(email=email).one()
-        return user.id
-    except:
-        return None
 
 
 # DISCONNECT - Revoke a current user's token and reset their login_session
@@ -161,7 +139,8 @@ def gdisconnect():
         response = make_response(
             json.dumps('Current user not connected.'), 401)
         response.headers['Content-Type'] = 'application/json'
-        return response
+        flash(response)
+        return redirect(url_for('showCatalog'))
     url = 'https://accounts.google.com/o/oauth2/revoke?token=%s' % access_token
     h = httplib2.Http()
     result = h.request(url, 'GET')[0]
@@ -183,7 +162,8 @@ def gdisconnect():
         response = make_response(
             json.dumps('Failed to revoke token for given user.', 400))
         response.headers['Content-Type'] = 'application/json'
-        return response
+        flash(response)
+        return redirect(url_for('showCatalog'))
 
 
 # JSON endpoint for category items
@@ -201,11 +181,11 @@ def itemJSON(category_id, item_id):
 
 
 # TODO change hometest back to home
-# TODO Write function that serves the home page with all categories and new/sale items
+# TODO Write function that serves the home page with all categories
 # add timestamp field to Item table filter for the newest 6 items
-# add sale/discount field to Item table for featured sale items in showCatalog()
+# add sale/discount field to Item table for featured sale items in showCatalog
 
-# Returns category name in template, passes category_id from a single item record
+# Returns category name in template, passes category_id from a single item
 def getCatName(category_id):
     categories = session.query(Category).all()
     catName = session.query(Category).filter_by(id=category_id).one()
@@ -216,7 +196,7 @@ def getCatName(category_id):
 @app.route('/catalog/')
 def showCatalog():
     categories = session.query(Category).all()
-# TODO filter and order items by timestamp when field is added to Item table for Latest Items on homepage
+# TODO filter and order items by timestamp when
     items = session.query(Item).limit(6).all()
 # Splits items list into sublists for use in html elements
     rowOneItems = items[0:2]
@@ -233,9 +213,15 @@ def showCatalog():
 # Write function that renders each category
 @app.route('/catalog/<int:category_id>/')
 def showCategory(category_id):
+    categories = session.query(Category).all()
     category = session.query(Category).filter_by(id=category_id).one()
     items = session.query(Item).filter_by(category_id=category_id)
-    return render_template('category.html', category=category, items=items)
+    return render_template('category.html',
+                           category=category,
+                           categories=categories,
+                           items=items,
+                           login_session=login_session)
+
 
 @app.route('/catalog/<int:category_id>/<int:item_id>/')
 def showItem(category_id, item_id):
@@ -253,7 +239,7 @@ def newItem(category_id):
                        description=request.form['description'],
                        price=request.form['price'],
                        category_id=category_id,
-                       user_id=login_session['user_id'])
+                       user_id=getUserID(login_session['email']))
         session.add(newItem)
         session.commit()
         flash("%s has been created!" % newItem.name)
@@ -302,6 +288,23 @@ def editItem(category_id, item_id):
                                i=editedItem)
 
 
+@app.route('/catalog/<int:category_id>/edit', methods=['GET', 'POST'])
+def editCategory(category_id):
+    if 'username' not in login_session:
+        return redirect('/catalog/login')
+    editedCategory = session.query(Category).filter_by(id=category_id).one()
+    if request.method == 'POST':
+        if request.form['name']:
+            editedCategory.name = request.form['name']
+        session.add(editedCategory)
+        session.commit()
+        flash("%s has been edited!" % editCategory.name)
+        return redirect(url_for('showCategory', category_id=category_id))
+    else:
+        return render_template('editCategory.html', category_id=category_id,
+                               i=editedCategory)
+
+
 @app.route('/catalog/<int:category_id>/delete', methods=['GET', 'POST'])
 def deleteCategory(category_id):
     if 'username' not in login_session:
@@ -317,9 +320,8 @@ def deleteCategory(category_id):
 
 
 # 3.Write delete item function
-@app.route('/catalog/<int:category_id>/<int:item_id>/delete/', methods=['GET',
-                                                                        'POST']
-           )
+@app.route('/catalog/<int:category_id>/<int:item_id>/delete/',
+           methods=['GET', 'POST'])
 def deleteItem(category_id, item_id):
     if 'username' not in login_session:
         return redirect('/catalog/login')
@@ -338,7 +340,7 @@ def deleteItem(category_id, item_id):
 def getUserID(email):
     try:
         user = session.query(User).filter_by(email=email).one()
-        return user
+        return user.id
     except:
         return None
 

@@ -15,18 +15,18 @@
             <div class="col-sm-4"></div>
             <div class="col-sm-4 col-sm-offset-4">
               <h2 class="text-center">Edit Item</h2>
-              <form role="form" action="{{url_for('editItem', category_id = category_id, item_id=i.id)}}" method="POST">
+              <form role="form" action="{{url_for('editItem', category_id = category_id, item_id = item_id)}}" method="POST">
                 <div class="form-group">
-                  <label>Name of Item</label>
+                  <label>Name of Category</label>
                   <input type="text" class="form-control" name="name" placeholder="{{i.name}}">
                 </div>
                 <div class="form-group">
-                  <label>Description</label>
-                  <input class="form-control" name="description" placeholder="{{i.description}}">
+                  <label>Name of Category</label>
+                  <input type="text" class="form-control" name="description" placeholder="{{i.description}}">
                 </div>
                 <div class="form-group">
-                  <label>Price</label>
-                  <input class="form-control" name="price" placeholder="{{i.price}}">
+                  <label>Name of Category</label>
+                  <input type="text" class="form-control" name="price" placeholder="{{i.price}}">
                 </div>
                 <button type="submit" class="btn btn-default">Update</button>
                 <button type="button" class="btn btn-default" onclick="window.location.href='{{url_for('showCategory', category_id = category_id)}}'">Back</button>
