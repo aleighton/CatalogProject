@@ -3,18 +3,47 @@
 <head>
 
   <!--LOAD PRE-REQUISITES FOR GOOGLE SIGN IN -->
-   <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js">
-  </script>
-
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
 <script src="//apis.google.com/js/platform.js?onload=start"> </script>
-
 <!-- END PRE-REQUISITES FOR GOOGLE SIGN IN -->
-
-
+<meta charset="utf-8">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+<link rel="stylesheet" href="/static/styles.css">
 </head>
-
-
 <body>
+  <section id="loginform" class="outer-wrapper">
+    <div class="inner-wrapper">
+      <div class="container">
+        <div class="row">
+          <div class="col-sm-4"></div>
+          <div class="col-sm-4">
+            <h2 class="text-center">Please Sign In</h2>
+          <div class="col-sm-4"></div>
+          <div class="row">
+            <div class="col-sm-4"></div>
+            <div class="col-sm-4"id="signinButton">
+            <span class="g-signin"
+              data-scope="openid email"
+              data-clientid="106527174708-rldo9ompdg9ht7f6a5fl1hl1uvcb1jbs.apps.googleusercontent.com"
+              data-redirecturi="postmessage"
+              data-accesstype="offline"
+              data-cookiepolicy="single_host_origin"
+              data-callback="signInCallback"
+              data-approvalprompt="force">
+            </span>
+          </div>
+          </div>
+          <div class="row">
+            <div class="col-sm-4"></div>
+            <div class="col-sm-4 text-center">
+              <button type="button" class="btn btn-default" onclick="window.location.href='{{url_for('showCatalog')}}'">Back</button>
+            </div>
+          </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
 
 <!-- GOOGLE PLUS SIGN IN-->

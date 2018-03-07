@@ -65,9 +65,13 @@
             <p class="card-text mb-auto">{{i.price}}</p>
             {% if 'username' in login_session %}
             <div class="row">
-            <a href='{{url_for('editItem', category_id = category.id, item_id = i.id)}}'>Edit</a>
+              <div class="col-mb-2">
+                <a class="text-center" href='{{url_for('editItem', category_id = category.id, item_id = i.id)}}'>Edit</a>
+              </div>
             </br>
-            <a href = '{{url_for('deleteItem', category_id = category.id, item_id = i.id)}}'>Delete</a>
+            <div class="col-mb-2">
+              <a class="text-center" href='{{url_for('deleteItem', category_id = category.id, item_id = i.id)}}'>Delete</a>
+            </div>
           </div>
           {% endif %}
           </div>

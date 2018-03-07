@@ -187,32 +187,32 @@ session.commit()
 monitor1 = Item(name="AOC Gaming, 144mhz, Freesync",
                 description="A masterpiece of design",
                 price="$1000",
-                category=phones,
+                category=monitors,
                 user=User1)
 monitor2 = Item(name="BenQ ultrawide 29inch 1080p",
                 description="A masterpiece of design",
                 price="$1000",
-                category=phones,
+                category=monitors,
                 user=User1)
 monitor3 = Item(name="Asus 27inch, 4K, 2ms response",
                 description="A masterpiece of design",
                 price="$1000",
-                category=phones,
+                category=monitors,
                 user=User1)
 monitor4 = Item(name="HP Infinity display",
                 description="A masterpiece of design",
                 price="$1000",
-                category=phones,
+                category=monitors,
                 user=User1)
 monitor5 = Item(name="Dell Inspiron 24inch HD resolution",
                 description="A masterpiece of design",
                 price="$1000",
-                category=phones,
+                category=monitors,
                 user=User1)
 monitor6 = Item(name="Apple Mac 27inch 4K",
                 description="A masterpiece of design",
                 price="$1000",
-                category=phones,
+                category=monitors,
                 user=User1)
 
 session.add(monitor1)

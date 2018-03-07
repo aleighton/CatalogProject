@@ -44,8 +44,7 @@ def showLogin():
 def gconnect():
     # Validate state token
     if request.args.get('state') != login_session['state']:
-        response = jsonify('Invalid state parameter.')
-        response.status_code = 401
+        response = jsonify({'response':'Invalid state parameter.'}), 401
         return response
     # Obtain authorization code
     code = request.data
@@ -56,8 +55,7 @@ def gconnect():
         oauth_flow.redirect_uri = 'postmessage'
         credentials = oauth_flow.step2_exchange(code)
     except FlowExchangeError:
-        response = jsonify('Failed to upgrade the authorization code.')
-        response.status_code = 401
+        response = jsonify({'response':'Failed to upgrade the authorization code.'}), 401
         return response
 
     # Check that the access token is valid.
@@ -68,29 +66,25 @@ def gconnect():
     result = json.loads(h.request(url, 'GET')[1])
     # If there was an error in the access token info, abort.
     if result.get('error') is not None:
-        response = jsonify(result.get('error'))
-        response.status_code = 500
+        response = jsonify({'response':result.get('error')}), 500
         return response
 
     # Verify that the access token is used for the intended user.
     gplus_id = credentials.id_token['sub']
     if result['user_id'] != gplus_id:
-        response = jsonify("Token's user ID doesn't match given user ID.")
-        response.status_code = 401
+        response = jsonify({'response':"Token's user ID doesn't match given user ID."}), 401
         return response
 
     # Verify that the access token is valid for this app.
     if result['issued_to'] != CLIENT_ID:
-        response = jsonify("Token's client ID does not match app's.")
-        response.status_code = 401
+        response = jsonify({'response':"Token's client ID does not match app's."}), 401
         print("Token's client ID does not match app's.")
         return response
 
     stored_access_token = login_session.get('access_token')
     stored_gplus_id = login_session.get('gplus_id')
     if stored_access_token is not None and gplus_id == stored_gplus_id:
-        response = jsonify('Already connected.')
-        response.status_code = 200
+        response = jsonify({'response':'Already connected.'}), 200
         return response
 
     # Store the access token in the session for later use.
@@ -148,14 +142,13 @@ def gdisconnect():
 
         response = jsonify({'response':'Successfully disconnected.'}), 200
         flash(response)
-        return response
-        #return redirect(url_for('showCatalog'))
+        #return response
+        return redirect(url_for('showCatalog'))
     else:
         # For whatever reason, the given token was invalid.
         response = jsonify({'response':'Failed to revoke token for given user.'}), 200
         flash(response)
-        #return redirect(url_for('showCatalog'))
-        return response
+        return redirect(url_for('showCatalog'))
 
 # JSON endpoint for category items
 @app.route('/catalog/<int:category_id>/JSON')
@@ -303,7 +296,7 @@ def deleteCategory(category_id):
         flash("%s has been deleted!" % categoryToDelete.name)
         return redirect(url_for('showCatalog'))
     else:
-        return render_template('deleteCategory.html')
+        return render_template('deleteCategory.html', category=categoryToDelete)
 
 
 # 3. Delete item function
