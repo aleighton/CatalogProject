@@ -223,4 +223,4 @@ session.add(monitor5)
 session.add(monitor6)
 session.commit()
 
-print ("Database created for Catalog App!")
+print("Database created for Catalog App!")

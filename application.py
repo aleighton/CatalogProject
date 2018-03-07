@@ -17,7 +17,7 @@ import math
 app = Flask(__name__)
 
 CLIENT_ID = json.loads(open('client_secrets.json',
-                       'r').read())['web']['client_id']
+                            'r').read())['web']['client_id']
 
 APPLICATION_NAME = "Blue Sky Tech Boutique"
 
@@ -44,7 +44,7 @@ def showLogin():
 def gconnect():
     # Validate state token
     if request.args.get('state') != login_session['state']:
-        response = jsonify({'response':'Invalid state parameter.'}), 401
+        response = jsonify({'response': 'Invalid state parameter.'}), 401
         return response
     # Obtain authorization code
     code = request.data
@@ -55,7 +55,8 @@ def gconnect():
         oauth_flow.redirect_uri = 'postmessage'
         credentials = oauth_flow.step2_exchange(code)
     except FlowExchangeError:
-        response = jsonify({'response':'Failed to upgrade the authorization code.'}), 401
+        response = jsonify(
+            {'response': 'Failed to upgrade the authorization code.'}), 401
         return response
 
     # Check that the access token is valid.
@@ -66,25 +67,27 @@ def gconnect():
     result = json.loads(h.request(url, 'GET')[1])
     # If there was an error in the access token info, abort.
     if result.get('error') is not None:
-        response = jsonify({'response':result.get('error')}), 500
+        response = jsonify({'response': result.get('error')}), 500
         return response
 
     # Verify that the access token is used for the intended user.
     gplus_id = credentials.id_token['sub']
     if result['user_id'] != gplus_id:
-        response = jsonify({'response':"Token's user ID doesn't match given user ID."}), 401
+        response = jsonify(
+            {'response': "Token's user ID doesn't match given user ID."}), 401
         return response
 
     # Verify that the access token is valid for this app.
     if result['issued_to'] != CLIENT_ID:
-        response = jsonify({'response':"Token's client ID does not match app's."}), 401
+        response = jsonify(
+            {'response': "Token's client ID does not match app's."}), 401
         print("Token's client ID does not match app's.")
         return response
 
     stored_access_token = login_session.get('access_token')
     stored_gplus_id = login_session.get('gplus_id')
     if stored_access_token is not None and gplus_id == stored_gplus_id:
-        response = jsonify({'response':'Already connected.'}), 200
+        response = jsonify({'response': 'Already connected.'}), 200
         return response
 
     # Store the access token in the session for later use.
@@ -120,12 +123,14 @@ def gconnect():
 
 # TODO returns traceback error JSON response not serializable
 # DISCONNECT - Revoke a current user's token and reset their login_session
+
+
 @app.route('/gdisconnect')
 def gdisconnect():
         # Only disconnect a connected user.
     access_token = login_session['access_token']
     if access_token is None:
-        response = jsonify({'response':'Current user not connected.'}), 401
+        response = jsonify({'response': 'Current user not connected.'}), 401
         flash(response)
         return redirect(url_for('showCatalog'))
     url = 'https://accounts.google.com/o/oauth2/revoke?token=%s' % access_token
@@ -140,17 +145,20 @@ def gdisconnect():
         del login_session['email']
         del login_session['picture']
 
-        response = jsonify({'response':'Successfully disconnected.'}), 200
+        response = jsonify({'response': 'Successfully disconnected.'}), 200
         flash(response)
-        #return response
+        # return response
         return redirect(url_for('showCatalog'))
     else:
         # For whatever reason, the given token was invalid.
-        response = jsonify({'response':'Failed to revoke token for given user.'}), 200
+        response = jsonify(
+            {'response': 'Failed to revoke token for given user.'}), 200
         flash(response)
         return redirect(url_for('showCatalog'))
 
 # JSON endpoint for category items
+
+
 @app.route('/catalog/<int:category_id>/JSON')
 def categoryJSON(category_id):
     items = session.query(Item).filter_by(category_id=category_id)
@@ -296,7 +304,9 @@ def deleteCategory(category_id):
         flash("%s has been deleted!" % categoryToDelete.name)
         return redirect(url_for('showCatalog'))
     else:
-        return render_template('deleteCategory.html', category=categoryToDelete)
+        return render_template(
+            'deleteCategory.html',
+            category=categoryToDelete)
 
 
 # 3. Delete item function
@@ -321,7 +331,7 @@ def getUserID(email):
     try:
         user = session.query(User).filter_by(email=email).one()
         return user.id
-    except:
+    except BaseException:
         return None
 
 
