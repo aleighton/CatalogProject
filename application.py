@@ -256,6 +256,8 @@ def editItem(category_id, item_id):
     if 'username' not in login_session:
         return redirect('/catalog/login')
     editedItem = session.query(Item).filter_by(id=item_id).one()
+    if editedItem.id != login_session['user_id']:
+        return '''<script>function myFunction() {alert('You are not authorized to edit this Item. Please create your own Item in order to edit.');window.location.href = "/catalog/%i/";}</script><body onload='myFunction()''>''' % category_id
     if request.method == 'POST':
         if request.form['name']:
             editedItem.name = request.form['name']
@@ -280,6 +282,8 @@ def editCategory(category_id):
     if 'username' not in login_session:
         return redirect('/catalog/login')
     editedCategory = session.query(Category).filter_by(id=category_id).one()
+    if editedCategory.id != login_session['user_id']:
+        return '''<script>function myFunction() {alert('You are not authorized to edit this Category. Please create your own Category in order to edit.');window.location.href = "/catalog/";}</script><body onload='myFunction()''>'''
     if request.method == 'POST':
         if request.form['name']:
             editedCategory.name = request.form['name']
@@ -298,6 +302,8 @@ def deleteCategory(category_id):
     if 'username' not in login_session:
         return redirect('/catalog/login')
     categoryToDelete = session.query(Category).filter_by(id=category_id).one()
+    if categoryToDelete.id != login_session['user_id']:
+        return '''<script>function myFunction() {alert('You are not authorized to delete this Category. Please create your own Category in order to delete.');window.location.href = "/catalog/";}</script><body onload='myFunction()''>'''
     if request.method == 'POST':
         session.delete(categoryToDelete)
         session.commit()
@@ -316,6 +322,8 @@ def deleteItem(category_id, item_id):
     if 'username' not in login_session:
         return redirect('/catalog/login')
     itemToDelete = session.query(Item).filter_by(id=item_id).one()
+    if itemToDelete.id != login_session['user_id']:
+        return '''<script>function myFunction() {alert('You are not authorized to delete this Item. Please create your own Item in order to delete.');window.location.href = "/catalog/%i/";}</script><body onload='myFunction()''>''' % category_id
     if request.method == 'POST':
         session.delete(itemToDelete)
         session.commit()
